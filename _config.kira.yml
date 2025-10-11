@@ -107,9 +107,9 @@ gitalk:
 giscus:
     active: true # 是否启用 giscus
     repo: misaka12648/misaka12648.github.io # 存放评论的 discus 所在的 repo
-    repoID: R_kgDOL3JXJw # GitHub repo ID
-    category: Announcements # 选择新 discussions 所在的分类
-    categoryID: DIC_kwDOL3JXJ84Cb7jv # 分类 ID
+    repoID: R_kgDOQAU8lQ # GitHub repo ID
+    category: Comments # 选择新 discussions 所在的分类
+    categoryID: DIC_kwDOQAU8lc4CwgBg # 分类 ID
     mapping: pathname # pathname, url, title, og:title, specific, number
     # term: # abc 123 # specific | number
     theme: light
