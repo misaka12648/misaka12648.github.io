@@ -134,3 +134,17 @@ friends:
 
 # 可复制的代码块
 copyableCodeblock: true
+
+# AI助手配置
+ai_assistant:
+  enable: true
+  # 硅基流动API配置（优先使用）
+  silicon_flow:
+    api_key: 
+      - "sk-sbexyisgtctqiawgnvwlmlwssmdmtvsmqhnvoduczpxeoyow"
+      - "sk-fgyhgmugmxruzzgwngziloovcnsqmivqcoqcvjcryoehlhwp"
+    model: "deepseek-ai/DeepSeek-V3.2-Exp"
+  # DeepSeek API配置（备用）
+  deepseek:
+    api_key: "sk-4ab429704e324c5db0460cf03eee6285"
+    model: "deepseek-chat"

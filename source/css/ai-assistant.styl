@@ -1,0 +1,343 @@
+/* AI悬浮球助手样式文件
+ * 企业级AI助手组件样式设计
+ * 支持响应式布局和现代化UI设计
+ */
+
+// 变量定义 - 匹配博客主题颜色
+$ai-assistant-primary = rgb(49, 174, 255)  // 博客主题色 - 蓝色
+$ai-assistant-secondary = rgba(49, 174, 255, 0.1)  // 主题色透明版本
+$ai-assistant-bg = #ffffff
+$ai-assistant-shadow = 0 10px 30px rgba(0, 0, 0, 0.1)
+$ai-assistant-border = 1px solid rgba(49, 174, 255, 0.2)
+
+// 悬浮球容器
+.ai-assistant-container
+  position: fixed
+  bottom: 20%
+  right: 5vw
+  z-index: 9999
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif
+
+// 悬浮球按钮
+.ai-assistant-btn
+  width: 60px
+  height: 60px
+  border-radius: 50%
+  background: linear-gradient(135deg, $ai-assistant-primary, rgba(49, 174, 255, 0.8))
+  border: none
+  cursor: pointer
+  display: flex
+  align-items: center
+  justify-content: center
+  box-shadow: $ai-assistant-shadow
+  transition: all 0.3s ease
+  position: relative
+  user-select: none
+  -webkit-user-select: none
+  -moz-user-select: none
+  -ms-user-select: none
+  
+  // 拖拽时的样式
+  &.dragging
+    box-shadow: 0 20px 50px rgba(16, 185, 129, 0.4)
+    transform: scale(1.05)
+    cursor: grabbing
+  
+  &:hover
+    transform: scale(1.1)
+    box-shadow: 0 15px 40px rgba(16, 185, 129, 0.3)
+  
+  &::before
+    content: ''
+    position: absolute
+    top: -5px
+    left: -5px
+    right: -5px
+    bottom: -5px
+    border-radius: 50%
+    background: linear-gradient(135deg, $ai-assistant-primary, #059669)
+    opacity: 0.2
+    animation: pulse 2s infinite
+  
+  .ai-icon
+    width: 30px
+    height: 30px
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))
+
+// 聊天窗口
+.ai-chat-window
+  position: absolute
+  bottom: 80px
+  right: 0
+  width: 95vw
+  max-width: 380px
+  height: 70vh
+  max-height: 500px
+  background: $ai-assistant-bg
+  border-radius: 16px
+  box-shadow: $ai-assistant-shadow
+  border: $ai-assistant-border
+  display: none
+  flex-direction: column
+  overflow: hidden
+  transition: all 0.3s ease
+  
+  &.active
+    display: flex
+    animation: slideInUp 0.3s ease
+
+// 聊天头部
+.ai-chat-header
+  background: linear-gradient(135deg, $ai-assistant-primary, rgba(49, 174, 255, 0.8))
+  color: white
+  padding: 16px 20px
+  display: flex
+  align-items: center
+  justify-content: space-between
+  
+  .ai-chat-title
+    font-size: 16px
+    font-weight: 600
+    display: flex
+    align-items: center
+    gap: 8px
+    
+    .ai-icon
+      width: 36px
+      height: 36px
+      
+    .ai-title-text
+      margin-left: 4px
+  
+  .ai-close-btn
+    background: none
+    border: none
+    color: white
+    cursor: pointer
+    padding: 4px
+    border-radius: 4px
+    transition: background 0.2s
+    
+    &:hover
+      background: rgba(255, 255, 255, 0.2)
+
+// 消息区域
+.ai-messages
+  flex: 1
+  padding: 20px
+  overflow-y: auto
+  display: flex
+  flex-direction: column
+  gap: 16px
+  
+  &::-webkit-scrollbar
+    width: 6px
+  
+  &::-webkit-scrollbar-track
+    background: #f1f5f9
+    border-radius: 3px
+  
+  &::-webkit-scrollbar-thumb
+    background: #cbd5e1
+    border-radius: 3px
+
+// 消息气泡
+.ai-message
+  max-width: 85%
+  padding: 12px 16px
+  border-radius: 16px
+  line-height: 1.5
+  font-size: 14px
+  
+  &.user
+    align-self: flex-end
+    background: $ai-assistant-primary
+    color: white
+    border-bottom-right-radius: 4px
+  
+  &.assistant
+    align-self: flex-start
+    background: #f8fafc
+    color: #334155
+    border: $ai-assistant-border
+    border-bottom-left-radius: 4px
+    
+    p
+      margin: 0
+
+// 输入区域
+.ai-input-area
+  padding: 16px 20px
+  border-top: $ai-assistant-border
+  background: #fafafa
+  
+  .ai-input-group
+    display: flex
+    gap: 8px
+    align-items: flex-end
+    justify-content: space-evenly
+  
+  .ai-textarea
+    flex: 1
+    max-height: 120px
+    padding: 10px 12px
+    border: $ai-assistant-border
+    border-radius: 8px
+    resize: none
+    font-size: 14px
+    font-family: inherit
+    background: white
+    
+    &:focus
+      outline: none
+      border-color: $ai-assistant-primary
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1)
+  
+  .ai-send-btn
+    background: $ai-assistant-primary
+    border: none
+    border-radius: 8px
+    padding: 10px 16px
+    color: white
+    cursor: pointer
+    transition: background 0.2s
+    font-size: 14px
+    font-weight: 500
+    
+    &:hover:not(:disabled)
+      background: rgba(49, 174, 255, 0.8)
+    
+    &:disabled
+      background: #9ca3af
+      cursor: not-allowed
+
+// 加载状态
+.ai-loading
+  display: flex
+  align-items: center
+  gap: 8px
+  padding: 12px 16px
+  background: #f8fafc
+  border-radius: 16px
+  border: $ai-assistant-border
+  align-self: flex-start
+  
+  .ai-loading-dots
+    display: flex
+    gap: 4px
+    
+    span
+      width: 6px
+      height: 6px
+      border-radius: 50%
+      background: $ai-assistant-primary
+      animation: bounce 1.4s infinite ease-in-out
+      
+      &:nth-child(1)
+        animation-delay: -0.32s
+      
+      &:nth-child(2)
+        animation-delay: -0.16s
+
+// 动画定义
+@keyframes pulse
+  0%, 100%
+    transform: scale(1)
+    opacity: 0.2
+  50%
+    transform: scale(1.1)
+    opacity: 0.1
+
+@keyframes slideInUp
+  from
+    opacity: 0
+    transform: translateY(20px) scale(0.9)
+  to
+    opacity: 1
+    transform: translateY(0) scale(1)
+
+@keyframes bounce
+  0%, 80%, 100%
+    transform: scale(0)
+  40%
+    transform: scale(1)
+
+// 响应式设计
+@media (max-width: 768px)
+  .ai-assistant-container
+    bottom: 15vh
+    right: 5vw
+
+  // 右侧吸附位置也使用5vw
+  .ai-assistant-btn
+    &.snap-right
+      right: 5vw
+
+  .ai-chat-window
+    width: 80vw
+    height: 70vh
+    right: 5vw
+    left: 5vw
+    bottom: 80px
+
+  .ai-assistant-btn
+    width: 12vw
+    height: 12vw
+    min-width: 50px
+    min-height: 50px
+    
+    .ai-icon
+      width: 6vw
+      height: 6vw
+    
+  .ai-messages
+    padding: 4vw
+    gap: 4vw
+
+  .ai-input-area
+    padding: 4vw 5vw
+
+  .ai-textarea
+    padding: 2.5vw 3vw
+    font-size: 3.5vw
+
+  .ai-send-btn
+    padding: 2.5vw 4vw
+    font-size: 3.5vw
+
+// 暗色模式支持
+@media (prefers-color-scheme: dark)
+  .ai-chat-window
+    background: #1f2937
+    border-color: #374151
+  
+  .ai-message.assistant
+    background: #374151
+    color: #f3f4f6
+    border-color: #4b5563
+  
+  .ai-input-area
+    background: #111827
+    border-color: #374151
+    
+    .ai-textarea
+      background: #374151
+      border-color: #4b5563
+      color: #f3f4f6
+      
+      &:focus
+        border-color: $ai-assistant-primary
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2)
+  
+  .ai-loading
+    background: #374151
+    border-color: #4b5563
+    
+    .ai-loading-dots span
+      background: #9ca3af
+
+  .ai-messages::-webkit-scrollbar-track
+    background: #374151
+  
+  .ai-messages::-webkit-scrollbar-thumb
+    background: #6b7280

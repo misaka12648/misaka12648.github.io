@@ -1,0 +1,1 @@
+本博客采用hexo-kira框架，layout.ejs文件被封装进ndoe_modules中，所以每次克隆时，需要手动将themes\kira-custom\layout\layout.ejs文件复制到node_modules\hexo-theme-kira\layout\layout.ejs目录下。
