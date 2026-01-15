@@ -10,6 +10,7 @@ class AIAssistant {
     constructor() {
         this.isOpen = false;
         this.conversationHistory = [];
+        this.storageKey = 'ai_assistant_history';
 
         // 从主题配置中读取API配置
         this.loadApiConfig();
@@ -77,7 +78,10 @@ class AIAssistant {
             this.createUI();
             this.elements.textarea.style.height = '36px';
             this.bindEvents();
-            this.addWelcomeMessage();
+            this.loadHistory();
+            if (this.conversationHistory.length === 0) {
+                this.addWelcomeMessage();
+            }
         }
 
     }
@@ -94,15 +98,22 @@ class AIAssistant {
                 <div class="ai-chat-header">
                     <div class="ai-chat-title">
                         <img src="/img/deepseek.svg" class="ai-icon" alt="DeepSeek AI">
-                        <span class="ai-title-text">DeepSeek-V3.2-Exp</span>
+                        <span class="ai-title-text">DeepSeek-V3.2</span>
                     </div>
-                    <button class="ai-close-btn" title="关闭">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                        </svg>
-                    </button>
+                    <div class="ai-header-actions">
+                        <button class="ai-clear-btn" title="清空对话">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M15 4V3H9V4H3.5V6H5.5V19C5.5 20.1 6.4 21 7.5 21H16.5C17.6 21 18.5 20.1 18.5 19V6H20.5V4H15ZM16.5 19H7.5V6H16.5V19Z"/>
+                            </svg>
+                        </button>
+                        <button class="ai-close-btn" title="关闭">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
-                <div class="ai-messages"></div>
+            <div class="ai-messages"></div>
                 <div class="ai-input-area">
                     <div class="ai-input-group">
                         <textarea 
@@ -134,6 +145,7 @@ class AIAssistant {
             textarea: container.querySelector('.ai-textarea'),
             sendBtn: container.querySelector('.ai-send-btn'),
             closeBtn: container.querySelector('.ai-close-btn'),
+            clearBtn: container.querySelector('.ai-clear-btn'),
             assistantBtn: container.querySelector('.ai-assistant-btn')
         };
     }
@@ -161,6 +173,13 @@ class AIAssistant {
             this.closeChat();
         });
 
+        // 清空按钮事件
+        this.elements.clearBtn.addEventListener('click', () => {
+            if (confirm('确定要清空对话历史吗？')) {
+                this.clearHistory();
+            }
+        });
+
         // 发送按钮事件
         this.elements.sendBtn.addEventListener('click', () => {
             this.sendMessage();
@@ -185,6 +204,87 @@ class AIAssistant {
                 e.preventDefault();
             }
         });
+
+        // 移动端输入框焦点处理
+        this.elements.textarea.addEventListener('focus', () => {
+            if (window.innerWidth <= 768) {
+                // 键盘弹出时，将聊天窗口调整为固定底部
+                const chatWindow = this.elements.chatWindow;
+                chatWindow.style.position = 'fixed';
+                chatWindow.style.bottom = '5%';
+                chatWindow.style.left = '5%';
+                chatWindow.style.right = '5%';
+                chatWindow.style.width = '90%';
+                chatWindow.style.maxWidth = '100%';
+                chatWindow.style.borderRadius = '16px';
+                chatWindow.style.transform = 'none';
+                
+                // 确保在最上层
+                chatWindow.style.zIndex = '10000';
+
+                // 延迟滚动到底部，等待键盘弹出
+                setTimeout(() => this.scrollToBottom(), 300);
+            }
+        });
+
+        this.elements.textarea.addEventListener('blur', () => {
+            if (window.innerWidth <= 768) {
+                const chatWindow = this.elements.chatWindow;
+                
+                // 恢复原始样式
+                chatWindow.style.position = '';
+                chatWindow.style.bottom = '';
+                chatWindow.style.left = '';
+                chatWindow.style.right = '';
+                chatWindow.style.width = '';
+                chatWindow.style.maxWidth = '';
+                chatWindow.style.borderRadius = '';
+                chatWindow.style.transform = '';
+                chatWindow.style.zIndex = '';
+                
+                // 重新计算位置
+                this.calculateChatWindowPosition();
+            }
+        });
+    }
+
+    /**
+     * 加载历史记录
+     */
+    loadHistory() {
+        const history = localStorage.getItem(this.storageKey);
+        if (history) {
+            try {
+                this.conversationHistory = JSON.parse(history);
+                this.conversationHistory.forEach(msg => {
+                    this.addMessage(msg.content, msg.role, false);
+                });
+            } catch (e) {
+                console.error('加载历史记录失败:', e);
+                this.conversationHistory = [];
+            }
+        }
+    }
+
+    /**
+     * 保存历史记录
+     */
+    saveHistory() {
+        try {
+            localStorage.setItem(this.storageKey, JSON.stringify(this.conversationHistory));
+        } catch (e) {
+            console.error('保存历史记录失败:', e);
+        }
+    }
+
+    /**
+     * 清空历史记录
+     */
+    clearHistory() {
+        this.conversationHistory = [];
+        localStorage.removeItem(this.storageKey);
+        this.elements.messages.innerHTML = '';
+        this.addWelcomeMessage();
     }
 
     /**
@@ -353,6 +453,7 @@ class AIAssistant {
             this.elements.textarea.focus();
 
             // 根据悬浮球位置计算弹窗显示位置
+            this.applySnapEffect(this.elements.assistantBtn);
             this.calculateChatWindowPosition();
         } else {
             this.elements.chatWindow.classList.remove('active');
@@ -579,12 +680,24 @@ class AIAssistant {
                 { role: 'user', content: message },
                 { role: 'assistant', content: aiResponse }
             );
+            this.saveHistory();
+
+            // 添加复制按钮
+            const lastMessage = this.elements.messages.querySelector('.ai-message.assistant:last-child');
+            if (lastMessage) {
+                this.addCopyButtons(lastMessage);
+            }
 
             return aiResponse;
         } catch (error) {
             console.error('处理API响应时出错:', error);
             this.hideLoading();
-            this.addMessage('抱歉，AI助手暂时无法响应，请稍后重试。', 'assistant');
+            // 仅在有响应时保存历史记录
+            if (save) {
+                this.addMessage('抱歉，AI助手暂时无法响应，请稍后重试。', 'assistant', true);
+            } else {
+                this.addMessage('抱歉，AI助手暂时无法响应，请稍后重试。', 'assistant');
+            }
             throw error;
         }
     }
@@ -592,13 +705,51 @@ class AIAssistant {
     /**
      * 添加消息到聊天窗口
      */
-    addMessage(content, type) {
+    addMessage(content, type, save = false) {
         const messageDiv = document.createElement('div');
         messageDiv.className = `ai-message ${type}`;
-        messageDiv.textContent = content;
+        
+        if (type === 'assistant') {
+            messageDiv.classList.add('markdown-body');
+            messageDiv.innerHTML = converter.makeHtml(content);
+            this.addCopyButtons(messageDiv);
+        } else {
+            messageDiv.textContent = content;
+        }
 
         this.elements.messages.appendChild(messageDiv);
         this.scrollToBottom();
+    }
+
+    /**
+     * 为代码块添加复制按钮
+     */
+    addCopyButtons(element) {
+        const preBlocks = element.querySelectorAll('pre');
+        preBlocks.forEach(pre => {
+            // 检查是否已经有复制按钮
+            if (pre.querySelector('.ai-copy-btn')) return;
+
+            const button = document.createElement('button');
+            button.className = 'ai-copy-btn';
+            button.textContent = '复制';
+            
+            button.addEventListener('click', () => {
+                const code = pre.querySelector('code')?.textContent || pre.textContent;
+                navigator.clipboard.writeText(code).then(() => {
+                    button.textContent = '已复制!';
+                    setTimeout(() => {
+                        button.textContent = '复制';
+                    }, 2000);
+                }).catch(err => {
+                    console.error('复制失败:', err);
+                    button.textContent = '失败';
+                });
+            });
+
+            pre.style.position = 'relative';
+            pre.appendChild(button);
+        });
     }
 
     /**

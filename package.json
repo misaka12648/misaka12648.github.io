@@ -5,7 +5,9 @@
   "scripts": {
     "build": "hexo generate",
     "clean": "hexo clean",
-    "deploy": "hexo deploy",
+    "deploy": "node scripts/deploy.js",
+    "back": "node scripts/rollback.js",
+    "deploy:hexo": "hexo deploy",
     "server": "hexo server"
   },
   "hexo": {
@@ -24,5 +26,12 @@
     "hexo-server": "^3.0.0",
     "hexo-theme-kira": "^1.4.9",
     "hexo-theme-landscape": "^1.0.0"
+  },
+  "devDependencies": {
+    "chalk": "^4.1.2",
+    "dotenv": "^17.2.3",
+    "node-ssh": "^13.2.1",
+    "ora": "^5.4.1",
+    "shelljs": "^0.10.0"
   }
 }
