@@ -4,16 +4,16 @@
 
 # Site
 title: Misaka12648の小站 # 网站标题
-subtitle: '' # 网站副标题
+subtitle: '前端知识分享' # 网站副标题
 description: '' # 网站描述
-keywords: 博客 # 网站关键字
+keywords: 前端 # 网站关键字
 author: Misaka12648 # 作者
 language: zh-CN # 网站语言
 timezone: '' # 时区
 
 # URL
 ## Set your site url here. For example, if you use GitHub Page, set url as 'https://username.github.io/project'
-url: https://misaka12648.xyz # 网站地址
+url: https://misaka12648.eu.org # 网站地址
 permalink: :year/:month/:day/:title/ # 文章链接
 permalink_defaults: # 文章链接默认值
 pretty_urls: # 美化链接

@@ -87,14 +87,16 @@ async function performRollback() {
         // But files that were *added* in the new (broken) version but didn't exist in the backup will remain.
         // So we SHOULD clean the directory.
         
-        await ssh.execCommand(`rm -rf ${config.remotePath}/*`);
+        // Use find to delete all files including hidden files (rm -rf dir/* doesn't match dotfiles)
+        await ssh.execCommand(`find ${config.remotePath} -mindepth 1 -delete`);
         
         // 2. Extract
         // backup was created with: tar -czf ... -C parentDir dirName
         // so it contains 'dirName' at the root.
         // If we extract to parentDir, it will recreate 'dirName' (which is config.remotePath)
         
-        const extractCmd = `tar -xzf ${backupFile} -C ${parentDir}`;
+        // Exclude .user.ini as it's a server-protected PHP config file with immutable attribute
+        const extractCmd = `tar -xzf ${backupFile} -C ${parentDir} --overwrite --exclude='*/.user.ini'`;
         const extractResult = await ssh.execCommand(extractCmd);
         
         if (extractResult.code !== 0) {

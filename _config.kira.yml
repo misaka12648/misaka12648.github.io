@@ -17,7 +17,7 @@ cdn: # 这里可以修改站点使用的库的CDN
     giscus:
         js: https://giscus.app/client.js
 
-beian: 豫ICP备2025119219号-1 # 备案号（选填，别往你们网站上挂我的备案号！！！）
+# beian: 豫ICP备2025119219号-1 # 备案号（选填，别往你们网站上挂我的备案号！！！）
 
 menu:
     回到首页:
@@ -139,12 +139,11 @@ copyableCodeblock: true
 ai_assistant:
   enable: true
   # 硅基流动API配置（优先使用）
+  # API密钥存储在 .env 文件中，构建时自动加密注入
   silicon_flow:
-    api_key: 
-      - "sk-sbexyisgtctqiawgnvwlmlwssmdmtvsmqhnvoduczpxeoyow"
-      - "sk-fgyhgmugmxruzzgwngziloovcnsqmivqcoqcvjcryoehlhwp"
-    model: "deepseek-ai/DeepSeek-V3.2"
+    api_key: [] # 构建时从 .env 加密注入
+    model: "deepseek-ai/DeepSeek-V3"
   # DeepSeek API配置（备用）
   deepseek:
-    api_key: "sk-4ab429704e324c5db0460cf03eee6285"
+    api_key: "" # 构建时从 .env 加密注入
     model: "deepseek-chat"

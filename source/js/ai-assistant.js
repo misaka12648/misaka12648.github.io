@@ -6,6 +6,38 @@
 let converter = new showdown.Converter();
 converter.setOption('tables', true);
 
+/**
+ * 解密函数
+ * 对应后端 inject-env.js 的加密逻辑
+ * @param {string} encrypted - 加密后的文本
+ * @param {string} obfuscationKey - 混淆密钥
+ * @returns {string} - 解密后的原文
+ */
+function decryptApiKey(encrypted, obfuscationKey) {
+    if (!encrypted || !obfuscationKey) return encrypted;
+    
+    try {
+        // 1. Base64 解码
+        const xored = atob(encrypted);
+        
+        // 2. XOR 还原
+        let reversed = '';
+        for (let i = 0; i < xored.length; i++) {
+            const charCode = xored.charCodeAt(i) ^ obfuscationKey.charCodeAt(i % obfuscationKey.length);
+            reversed += String.fromCharCode(charCode);
+        }
+        
+        // 3. 字符串反转还原
+        const base64 = reversed.split('').reverse().join('');
+        
+        // 4. Base64 解码得到原文
+        return atob(base64);
+    } catch (e) {
+        console.error('解密失败:', e);
+        return encrypted;
+    }
+}
+
 class AIAssistant {
     constructor() {
         this.isOpen = false;
@@ -26,6 +58,7 @@ class AIAssistant {
     /**
      * 从主题配置中加载API配置
      * 支持从window.aiAssistantConfig或_config.kira.yml中读取配置
+     * 支持解密加密的API密钥
      */
     loadApiConfig() {
         // 尝试从全局变量获取配置
@@ -50,20 +83,37 @@ class AIAssistant {
             console.log('未找到全局配置，使用默认配置');
         }
 
-        // 硅基流动API配置
-        const siliconFlowConfig = config.silicon_flow;
+        // 获取混淆密钥
+        const obfuscationKey = config.obfuscation_key || '';
 
-        this.siliconFlowApiKey = siliconFlowConfig.api_key
+        // 硅基流动API配置
+        const siliconFlowConfig = config.silicon_flow || {};
+        
+        // 解密 API 密钥
+        if (siliconFlowConfig.encrypted && obfuscationKey) {
+            const encryptedKeys = siliconFlowConfig.api_key || [];
+            this.siliconFlowApiKey = encryptedKeys.map(key => decryptApiKey(key, obfuscationKey));
+        } else {
+            this.siliconFlowApiKey = siliconFlowConfig.api_key || [];
+        }
+        
         this.siliconFlowApiUrl = 'https://api.siliconflow.cn/v1/chat/completions';
-        this.siliconFlowModel = siliconFlowConfig.model;
+        this.siliconFlowModel = siliconFlowConfig.model || 'deepseek-ai/DeepSeek-V3';
 
         // DeepSeek API配置（作为备用）
-        const deepseekConfig = config.deepseek;
-        this.deepseekApiKey = deepseekConfig.api_key;
+        const deepseekConfig = config.deepseek || {};
+        
+        // 解密 API 密钥
+        if (deepseekConfig.encrypted && obfuscationKey) {
+            this.deepseekApiKey = decryptApiKey(deepseekConfig.api_key, obfuscationKey);
+        } else {
+            this.deepseekApiKey = deepseekConfig.api_key || '';
+        }
+        
         this.deepseekApiUrl = 'https://api.deepseek.com/v1/chat/completions';
-        this.deepseekModel = deepseekConfig.model;
+        this.deepseekModel = deepseekConfig.model || 'deepseek-chat';
 
-        console.log('已从配置文件加载API配置');
+        console.log('已从配置文件加载API配置（已解密）');
     }
 
     /**
@@ -480,11 +530,11 @@ class AIAssistant {
             // 悬浮球在右半边，弹窗显示在悬浮球左上角
             chatWindow.style.left = 'auto';
             chatWindow.style.right = '5vw';
-            chatWindow.style.bottom = '10vh';
+            this.setChatWindowBottom(chatWindow);
         } else {
             // 悬浮球在左半边，弹窗显示在悬浮球右上角
             chatWindow.style.left = '5vw';
-            chatWindow.style.bottom = '10vh';
+            this.setChatWindowBottom(chatWindow);
         }
     }
 
@@ -494,6 +544,40 @@ class AIAssistant {
     closeChat() {
         this.isOpen = false;
         this.elements.chatWindow.classList.remove('active');
+    }
+
+    /**
+     * 动态设置聊天窗口的底部位置，以适应移动端软键盘
+     * @param {HTMLElement} chatWindow - 聊天窗口元素
+     */
+    setChatWindowBottom(chatWindow) {
+        if (window.visualViewport) {
+            // 初始设置
+            const viewportHeight = window.visualViewport.height;
+            const documentHeight = document.documentElement.clientHeight;
+            const keyboardHeight = documentHeight - viewportHeight;
+            if (keyboardHeight > 0) {
+                chatWindow.style.bottom = `${keyboardHeight + 10}px`;
+            } else {
+                chatWindow.style.bottom = '10vh';
+            }
+
+            // 监听 visualViewport 的变化
+            window.visualViewport.addEventListener('resize', () => {
+                const currentViewportHeight = window.visualViewport.height;
+                const currentDocumentHeight = document.documentElement.clientHeight;
+                const currentKeyboardHeight = currentDocumentHeight - currentViewportHeight;
+
+                if (currentKeyboardHeight > 0) {
+                    chatWindow.style.bottom = `${currentKeyboardHeight + 10}px`;
+                } else {
+                    chatWindow.style.bottom = '10vh';
+                }
+            });
+        } else {
+            // 如果不支持 visualViewport，则回退到默认的 10vh
+            chatWindow.style.bottom = '10vh';
+        }
     }
 
     /**
